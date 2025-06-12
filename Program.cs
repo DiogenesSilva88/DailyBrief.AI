@@ -1,3 +1,7 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using DailyBrief.AI.Configurations;
 
 namespace DailyBrief.AI
 {
@@ -8,11 +12,35 @@ namespace DailyBrief.AI
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // 🔐 JWT Configuration
+            var jwtSection = builder.Configuration.GetSection("JwtSettings");
+            builder.Services.Configure<JwtSettings>(jwtSection);
+
+            var jwtSettings = jwtSection.Get<JwtSettings>();
+            var key = Encoding.ASCII.GetBytes(jwtSettings.SecretKey);
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
             var app = builder.Build();
 
@@ -25,8 +53,8 @@ namespace DailyBrief.AI
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication(); // 🔐 Adicionado antes do Authorization
             app.UseAuthorization();
-
 
             app.MapControllers();
 
