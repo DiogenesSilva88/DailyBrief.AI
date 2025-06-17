@@ -19,6 +19,13 @@ Oferecer um resumo inteligente das tarefas, compromissos e prioridades do dia co
 🚧 MVP em desenvolvimento  
 🔧 Estrutura inicial criada
 
+## ✅ Funcionalidades
+
+- Cadastro de usuários
+- Geração de briefings personalizados
+- Integração com banco de dados SQL Server
+- Documentação da API com Swagger
+
 ## Como rodar o projeto localmente
 
 ```bash
